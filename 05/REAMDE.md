@@ -53,9 +53,13 @@ def partial(func, *args, **keywords):
     def newfunc(*fargs, **fkeywords):
         newkeywords = keywords.copy()
         newkeywords.update(fkeywords) # 添加到指定字典dict里的字典
-        return func(*(args + fargs), **newkeywords) #拆包
+        return func(*(args + fargs), **newkeywords) #装包
     newfunc.func = func
     newfunc.args = args
     newfunc.keywords = keywords
     return newfunc
 ```
+
+## 装包与拆包
+* 装包就是把未命名的参数放到元组中，把命名参数放到字典中
+* 拆包将一个结构中的数据拆分为多个单独变量中 *args **kwargs
