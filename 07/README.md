@@ -27,5 +27,45 @@ Python 不要求声明变量，但是假定在函数定义体中赋值的变量�
 ![avatar](images/1.gif)
 
 ```
-Note:闭包是一种函数，它会保留定义函数时存在的自由变量的绑定，这样调用函数时，虽然定义作用域不可用了，但是仍能使用那些绑定。
+Note:闭包是一种函数，它会保留定义函数时存在的自由变量的绑定。
 ```
+
+ Python 在 __code__ 属性（表示编译后的函数定义体）中保存局部变量和自由变量的名称,__closure__ 中的各个元素对应于 __code__.co_freevars 中的一个名称。这些元素是 cell 对象，有个 cell_contents 属性，保存着真正的值
+ 
+ 
+* nonlocal:Python 3 引入了 nonlocal 声明。它的作用是把变量标记为自由变量，即使在函数中为变量赋予新值了，也会变成自由变量。如果为 nonlocal 声明的变量赋予新值，闭包中保存的绑定会更新。
+
+```
+Note:对数字、字符串、元组等不可变类型来说，只能读取，不能更新。如果尝试重新绑定，
+     例如count=count+1，其实会隐式创建局部变量count。这样，count就不是自由变量了，因此不会保存在闭包中。
+
+总结:
+如果在内部函数中只是仅仅读外部变量，可以不在此变量前加nonlocal
+如果在内部函数中尝试进行修改外部变量，且外部变量为不可变类型，则需要在变量前加nonlocal，
+如果变量为可变类型，则不需要添加nonlocal
+```
+
+## 深入装饰器
+
+* @wraps:很多时候也会使用functools的wraps来创建装饰器，这是为了被封装的函数能保留原来的内置属性。
+
+```
+from functools import wraps
+def test1(value):
+    def _test1(func):
+        @wraps(func)
+        def wrapped_function():
+            print("before")
+            print(value)
+            func()
+            print("after")
+         return wrapped_function
+    return _test1
+@test1(value=2)
+def test2():
+    print("sssss")
+```
+
+* 叠放装饰器：把 @d1 和 @d2 两个装饰器按顺序应用到 f 函数上，作用相当于 f = d1(d2(f)) 
+
+* 参数化装饰器：参数化装饰器通常会把被装饰的函数替换掉，而且结构上需要多一层嵌套。
