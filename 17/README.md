@@ -45,4 +45,11 @@
 
 ## 延伸阅读
 
-PEP 3148—futures —execute computations asynchronously”（https://www.python.org/dev/peps/pep-3148/ ）。在这个 PEP 中，Quinlan 写道，concurrent.futures 库“受 Java 的 java.util.concurrent 包影响很大”。Jan Palach 写的 Parallel Programming with Python （Packt 出版社）一书介绍了几个并发编程的工具，包括 concurrent.futures 、threading 和 multiprocessing 库。除了标准库之外，这本书还讨论了 Celery（http://celery.readthedocs.org/en/latest/getting-started/introduction.html ）。这是一个任务队列，用于把工作分配给多个线程和进程，甚至是不同的设备。
+* PEP 3148—futures —execute computations asynchronously”（https://www.python.org/dev/peps/pep-3148/ ）。在这个 PEP 中，Quinlan 写道，concurrent.futures 库“受 Java 的 java.util.concurrent 包影响很大”。Jan Palach 写的 Parallel Programming with Python （Packt 出版社）一书介绍了几个并发编程的工具，包括 concurrent.futures 、threading 和 multiprocessing 库。除了标准库之外，这本书还讨论了 Celery（http://celery.readthedocs.org/en/latest/getting-started/introduction.html ）。这是一个任务队列，用于把工作分配给多个线程和进程，甚至是不同的设备。
+
+* https://python-parallel-programmning-cookbook.readthedocs.io/zh_CN/latest/
+
+* https://docs.python.org/3/faq/library.html#can-t-we-get-rid-of-the-global-interpreter-lock
+
+
+    It has been suggested that the GIL should be a per-interpreter-state lock rather than truly global; interpreters then wouldn’t be able to share objects. Unfortunately, this isn’t likely to happen either. It would be a tremendous amount of work, because many object implementations currently have global state. For example, small integers and short strings are cached; these caches would have to be moved to the interpreter state. Other object types have their own free list; these free lists would have to be moved to the interpreter state. And so on.
