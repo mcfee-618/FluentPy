@@ -24,6 +24,7 @@ class Future:
     def __call__(self, *args, **kwargs):
         print("开始执行future")
         self.callback(self.param)
+        print("结束执行future")
 
 
 class MyTask:
@@ -31,9 +32,15 @@ class MyTask:
         self.generator = gen
 
     def __call__(self, *args, **kwargs):
-        print(inspect.getgeneratorstate(self.generator))
-        yield from self.generator
-        print("end")
+        rs = None
+        try:
+            rs = next(self.generator)
+        except StopIteration as e:
+            pass
+        else:
+            return rs
+
+
 
 
 class EventLoop:
@@ -59,16 +66,13 @@ class EventLoop:
             ntodo = len(self.pending_tasks)
             for i in range(ntodo):
                 task = self.pending_tasks.popleft()
-                print(task)
-                if isinstance(task, MyTask):
-                    rs = next(task())
-                else:
-                    rs = task()
+                rs = task()
                 if isinstance(rs, Future):
                     rs.add_done_callback(self.add_task, task)
                     self.waiter_tasks.append(rs)
-                else:
-                    print("协程已经执行完了")
+
+            if len(self.pending_tasks)==0 and len(self.waiter_tasks)==0:
+                break
 
     def add_task(self, task):
         self.pending_tasks.append(task)
@@ -81,13 +85,21 @@ eventloop = EventLoop()
 
 
 def task1():
-    print("a")
-    print("c")
+    print("task1-a")
+    print("task1-c")
     yield from sleep(1)
-    print("b")
-    print("d")
-    #exit()
+    print("task1-b")
+    print("task1-d")
 
+def task2():
+    print("task2-a")
+    print("task2-c")
+    yield from sleep(1)
+    print("task2-b")
+    print("task2-d")
+
+
+    #exit()
 
 def sleep(seconds):
     future = Future(seconds + time.time())
@@ -96,4 +108,5 @@ def sleep(seconds):
 
 task = MyTask(task1())
 eventloop.add_task(task)
+eventloop.add_task(MyTask(task2()))
 eventloop.run()
