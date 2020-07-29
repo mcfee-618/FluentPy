@@ -6,71 +6,99 @@
 @time: 2020/7/28 下午6:42
 """
 from random import randint
+import inspect
+import collections
+import time
+
+
+class Future:
+
+    def __init__(self, time):
+        self.callback = None
+        self.param = None
+        self.time = time
+
+    def add_done_callback(self, fn, param):
+        self.callback = fn
+        self.param = param
+
+    def __call__(self, *args, **kwargs):
+        print("开始执行future")
+        self.callback(self.param)
+
+
+class MyTask:
+
+    def __init__(self, gen):
+        self.generator = gen
+
+    def __call__(self, *args, **kwargs):
+        print( inspect.getgeneratorstate(self.generator))
+        yield from self.generator
 
 
 class EventLoop:
+
     def __init__(self):
-        # 待办事件列表，类似于收件箱，就是上图中的Task Queue，里面的task就是API
-        self.events_to_listen = []
-        # 当前可执行任务列表，单线程主要执行的队列
-        self.events_to_process = []
+        self.pending_tasks = collections.deque()
+        self.waiter_tasks = collections.deque()
 
-        self.callbacks = {}
-        self.timeout = 5
+    def run_until_complete(self, tasks):
+        for task in tasks:
+            self.pending_tasks.append(task)
 
-    def register_event(self, event, callback):
-        self.events_to_listen.append(event)
-        self.callbacks[event] = callback
-
-    def unregister_event(self, event):
-        self.events_to_listen.remove(event)
-        del self.callbacks[event]
-
-    # 根据超时时间，从队列里面找出超时的事件
-    def poll_events(self):
-        self.events_to_process = []
-
-        for event in self.events_to_listen:
-            # 如果还不到检查时间，就再等等
-            if event.timeout < self.timeout:
-                event.timeout += 1
-            else:
-                self.events_to_process.append(event)
-
-    def _process_events(self, events):
-        for event in events:
-            # 模拟执行过程中可能会阻塞
-            if randint(0, 1):
-                self.callbacks[event]()
-                self.unregister_event(event)
-                # 如果阻塞了就不执行，同时将超时时间降低，放在待执行下次再检查
-            else:
-                event.timeout -= 2
-
-    def start_loop(self):
-        # pythontutor不支持无限循环的方式
-        # while True:
+    def run(self):
         while True:
-            self.poll_events()
-            self._process_events(self.events_to_process)
+            nwait = len(self.waiter_tasks)
+            new_waiters = collections.deque()
+            for i in range(nwait):
+                task = self.waiter_tasks.popleft()
+                if task.time <= time.time():
+                    self.pending_tasks.append(task)
+                else:
+                    new_waiters.append(task)
+            self.waiter_tasks = new_waiters
+            ntodo = len(self.pending_tasks)
+            for i in range(ntodo):
+                task = self.pending_tasks.popleft()
+                print(task)
+                if isinstance(task, MyTask):
+                    try:
+                        rs = next(task())
+                    except Exception as e:
+                        exit()
+                else:
+                    rs = task()
+                if isinstance(rs, Future):
+                    rs.add_done_callback(self.add_task, task)
+                    self.waiter_tasks.append(rs)
+                else:
+                    print("协程已经执行完了")
+
+    def add_task(self, task):
+        self.pending_tasks.append(task)
+
+    def remove_task(self, task):
+        self.pending_tasks.remove(task)
 
 
-class Event():
-    def __init__(self, timeout, callback):
-        self.timeout = timeout
-        self.callback = callback
-
-    def process(self):
-        print('An Event is processed:', self.timeout)
+eventloop = EventLoop()
 
 
-def call_back():
-    print('this is call_back')
+def task1():
+    print("a")
+    print("c")
+    yield from sleep(1)
+    print("b")
+    print("d")
 
 
-loop = EventLoop()
-for item in range(1, 4):
-    timeout = randint(0, 6)
-    event = Event(timeout, call_back)
-    loop.register_event(event, call_back)
-loop.start_loop()
+def sleep(seconds):
+    future = Future(seconds + time.time())
+    yield future
+
+
+task = MyTask(task1())
+eventloop.add_task(task)
+eventloop.run()
+
