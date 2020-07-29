@@ -12,7 +12,6 @@ import time
 
 
 class Future:
-
     def __init__(self, time):
         self.callback = None
         self.param = None
@@ -28,17 +27,16 @@ class Future:
 
 
 class MyTask:
-
     def __init__(self, gen):
         self.generator = gen
 
     def __call__(self, *args, **kwargs):
-        print( inspect.getgeneratorstate(self.generator))
+        print(inspect.getgeneratorstate(self.generator))
         yield from self.generator
+        print("end")
 
 
 class EventLoop:
-
     def __init__(self):
         self.pending_tasks = collections.deque()
         self.waiter_tasks = collections.deque()
@@ -63,10 +61,7 @@ class EventLoop:
                 task = self.pending_tasks.popleft()
                 print(task)
                 if isinstance(task, MyTask):
-                    try:
-                        rs = next(task())
-                    except Exception as e:
-                        exit()
+                    rs = next(task())
                 else:
                     rs = task()
                 if isinstance(rs, Future):
@@ -91,6 +86,7 @@ def task1():
     yield from sleep(1)
     print("b")
     print("d")
+    #exit()
 
 
 def sleep(seconds):
@@ -101,4 +97,3 @@ def sleep(seconds):
 task = MyTask(task1())
 eventloop.add_task(task)
 eventloop.run()
-
