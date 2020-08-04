@@ -36,7 +36,7 @@ asyncio 是用来编写 并发 代码的库，使用 async/await 语法。asynci
 
 ## 异步框架基础
 
-* 任何一个协程框架都首先必须是一个异步框架，一个异步框架通常主要包括事件循环【核心】、事件队列【可以执行的队列和未来需要执行的队列】、polling【监控socket活动】、timer队列保存定时器。
+* 任何一个协程框架都首先必须是一个异步框架，一个异步框架通常主要包括事件循环【核心】、事件队列【可以执行的队列和未来需要执行的队列】、polling【轮询监控socket活动】、timer队列保存定时器。
     * asyncio的事件队列里面就是普通的callable，每个callable都是一小份工作，当这部分工作做完之后，会等待下一个条件：如果要等socket，就设置polling回调。如果要等超时时间，就设置timer，timer也有回调【延迟执行】，回调是一个基础。
     
     * 事件循环：事件循环是一个死循环，事件循环（也就是所谓EventLoop）开始的时候，会不断从事件队列里取callable，然后一个一个call过去，call完换下一个，当时间满足的时候也会调用这个callable。遇到socket就设置是一个异步并yield配合select调用和回调来完成。
@@ -44,7 +44,7 @@ asyncio 是用来编写 并发 代码的库，使用 async/await 语法。asynci
     协程不知道自己的IO好了没有，协程把自己使用的文件（socket）注册到事件循环里，事件循环负责监测IO好了没有，
     同时协程负责在IO上增加一个小的回调在IO完成的时候把自己唤醒放到队列里等待执行。
     ```
-    
+    * future：任何程序都可以通过add_callback的接口为这个Future设置一个回调函数，在Future完成时会调用这个回调函数。Future调用callback并不是直接调用（否则反复触发会导致栈溢出），而是通过前面说的延迟调用，将callable放到事件队列里，让事件循环帮忙调用一下。每次通过yield返回一个Future，然后我们为这个Future设置一个callback，这个callback触发的时候，我们将Future里保存的结果发送给这个coroutine【send】。
 
 
 ## 避免阻塞型调用
