@@ -1,4 +1,6 @@
-## asyncio
+## asyncio 
+
+* 读音： [əˈsɪŋk] [æˈsɪŋk]
 
 asyncio 是用来编写 并发 代码的库，使用 async/await 语法。asyncio 被用作多个提供高性能 Python 异步框架的基础，包括网络和网站服务，数据库连接库，分布式任务队列等等。
 
