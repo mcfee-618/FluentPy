@@ -2,7 +2,7 @@
 
 * 读音： [əˈsɪŋk] [æˈsɪŋk]
 
-asyncio 是用来编写 并发 代码的库，使用 async/await 语法。asyncio 被用作多个提供高性能 Python 异步框架的基础，包括网络和网站服务，数据库连接库，分布式任务队列等等。
+asyncio 是用来编写 并发 代码的库，使用 async/await 语法。asyncio 被用作多个提供高性能 Python 异步框架的基础，包括网络和网站服务，数据库连接库，分布式任务队列等等。通过 async/await 语法 桥接 基于回调的库和代码
 
 * 并发是指一次处理多件事。并行是指一次做多件事。本章介绍 asyncio 包，这个包使用事件循环驱动的协程实现并发。这是 Python 中最大也是最具雄心壮志的库之一。asyncio 大量使用 yield from 表达式，yield from在asyncio模块中得以发扬光大。
 
