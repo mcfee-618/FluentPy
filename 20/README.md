@@ -50,12 +50,27 @@ __init__其实是初始化方法，真正的构造方法时__new__，我们几�
 ## 内置功能
 
 * 特殊属性
+```
 __class__ :对象所属类的引用
 __dict__  :一个映射，存储对象或类的可写属性,如果类有 __slots__ 属性，它的实例可能没有 __dict__ 属性。
 __slots__ :类可以定义这个这属性，限制实例能有哪些属性。
+```
 
 * 特殊方法
-dir([object]) 列出对象的大多数属性。
+```
+dir([object]) ：列出对象的大多数属性。
 getattr(object, name[, default])：从 object 对象中获取 name 字符串对应的属性。
+hasattr(object, name) ： 如果 object 对象中存在指定的属性，或者能以某种方式（例如继承）通过 object 对象获取指定的属性，返回 True 。
+setattr(object, name, value)：　把 object 对象指定属性的值设为 value ，前提是 object 对象能接受那个值。这个函数可能会创建一个新属性，或者覆盖现有的属性。
+vars([object])：返回 object 对象的 __dict__ 属性；如果实例所属的类定义了 __slots__ 属性，实例没有 __dict__ 属性，那么 vars 函数不能处理那个实例
+```
 
+* 处理属性的特殊方法
 
+使用点号或内置的 getattr 、hasattr 和 setattr 函数存取属性都会触发下述列表中相应的特殊方法。但是，直接通过实例的 __dict__ 属性读写属性不会触发这些特殊方法——如果需要，通常会使用这种方式跳过特殊方法。
+```
+obj.attr 和 getattr(obj, 'attr', 42) 都会触发 Class.__getattribute__(obj, 'attr') 方法。
+把对象传给 dir 函数时调用，列出属性。例如，dir(obj) 触发 Class.__dir__(obj) 方法。
+__getattr__(self, name) 仅当获取指定的属性失败，搜索过 obj 、Class 和超类之后调用。
+__setattr__(self, name, value) 尝试设置指定的属性时总会调用这个方法。点号和 setattr 内置函数会触发这个方法。
+```
