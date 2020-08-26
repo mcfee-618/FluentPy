@@ -14,5 +14,6 @@ cls_attrs['show'] = show
 cls = type("Person", (object,), cls_attrs)
 print(cls)
 obj = cls("2","3")
+obj.name="jjj"
 obj.show()
 
